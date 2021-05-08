@@ -240,7 +240,7 @@ class _CupertinoListViewState extends State<CupertinoListView> {
           physics: widget.physics,
           restorationId: widget.restorationId,
         ),
-        Positioned(child: _header),
+        Positioned(top: 0, left: 0, right: 0, child: _header),
       ],
     );
     if (widget.padding != null) {
