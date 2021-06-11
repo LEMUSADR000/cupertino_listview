@@ -10,24 +10,22 @@ abstract class CupertinoListDelegate extends SliverChildDelegate {
   final int sectionCount;
 
   ///Absolute indexes of each section
-  List<int> _sectionStarts;
+  late List<int> _sectionStarts;
 
   /// Estimation of the Number of items.
-  int _estimatedItemCount;
+  late int _estimatedItemCount;
 
-  CupertinoListDelegate({this.sectionCount}) : super();
+  CupertinoListDelegate({required this.sectionCount}) : super();
 
   /// Retrieve the number of items for a given section.
-  int itemCount({int section});
+  int itemCount({required int section});
 
-  int _section(int index) =>
-      _sectionStarts.lastIndexWhere((element) => element <= index);
+  int _section(int index) => _sectionStarts.lastIndexWhere((element) => element <= index);
 
   /// Compute all data needed to build section and items widgets.
   /// Must be called before building widgets.
   void setup() {
-    final elementsPerSection =
-        List.generate(sectionCount, (index) => itemCount(section: index));
+    final elementsPerSection = List.generate(sectionCount, (index) => itemCount(section: index));
     _sectionStarts = List<int>.filled(sectionCount, 0);
     for (var i = 1; i < sectionCount; i++) {
       _sectionStarts[i] = 1 + _sectionStarts[i - 1] + elementsPerSection[i - 1];
@@ -46,29 +44,26 @@ abstract class CupertinoListDelegate extends SliverChildDelegate {
   /// Build the overlay displaying the current section.
   /// Depending of the scroll offset, the retrieved widget may be truncated,
   /// in order to stick with the next section widget.
-  Widget buildSectionOverlay(
-      GlobalKey listKey, BuildContext context, double scrollOffset) {
-    final listRender = listKey.currentContext.findRenderObject()
-        as RenderSliverMultiBoxAdaptor;
+  Widget buildSectionOverlay(GlobalKey listKey, BuildContext context, double scrollOffset) {
+    final listRender = listKey.currentContext!.findRenderObject() as RenderSliverMultiBoxAdaptor;
 
     final firstChild = _findFirstVisibleObject(listRender, scrollOffset);
     if (firstChild == null) {
       return SizedBox();
     }
-    final childData = firstChild.parentData as SliverMultiBoxAdaptorParentData;
-    final childSection = max(0, _section(childData.index));
+    final childData = firstChild.parentData as SliverMultiBoxAdaptorParentData?;
+    final childSection = max(0, _section(childData!.index!));
     if (childData.index == 0 && scrollOffset <= 0.0) {
       return SizedBox();
     }
 
     final nextSectionBox = _findSection(listRender, childSection + 1);
-    final indexPath = SectionPath(
-        section: childSection, absoluteIndex: _sectionStarts[childSection]);
+    final indexPath = SectionPath(section: childSection, absoluteIndex: _sectionStarts[childSection]);
     if (nextSectionBox == null) {
       return buildSection(context, indexPath, true);
     }
 
-    var offset = listRender.childScrollOffset(nextSectionBox) - scrollOffset;
+    var offset = listRender.childScrollOffset(nextSectionBox)! - scrollOffset;
     if (offset < 0.0) {
       offset = double.infinity;
     }
@@ -85,26 +80,24 @@ abstract class CupertinoListDelegate extends SliverChildDelegate {
     );
   }
 
-  RenderObject _findFirstVisibleObject(
-      RenderSliverMultiBoxAdaptor listRenderObject, double scrollOffset) {
-    RenderObject sectionRender;
-    SliverMultiBoxAdaptorParentData childData;
+  RenderObject? _findFirstVisibleObject(RenderSliverMultiBoxAdaptor listRenderObject, double scrollOffset) {
+    RenderObject? sectionRender;
+    SliverMultiBoxAdaptorParentData? childData;
     listRenderObject.visitChildren((child) {
-      childData = child.parentData as SliverMultiBoxAdaptorParentData;
-      if (childData.layoutOffset <= scrollOffset) {
+      childData = child.parentData as SliverMultiBoxAdaptorParentData?;
+      if (childData!.layoutOffset! <= scrollOffset) {
         sectionRender = child;
       }
     });
     return sectionRender;
   }
 
-  RenderObject _findSection(
-      RenderSliverMultiBoxAdaptor listRenderObject, int section) {
-    RenderObject sectionRender;
-    SliverMultiBoxAdaptorParentData childData;
+  RenderObject? _findSection(RenderSliverMultiBoxAdaptor listRenderObject, int section) {
+    RenderObject? sectionRender;
+    SliverMultiBoxAdaptorParentData? childData;
     listRenderObject.visitChildren((child) {
-      childData = child.parentData as SliverMultiBoxAdaptorParentData;
-      if (_section(childData.index) == section && sectionRender == null) {
+      childData = child.parentData as SliverMultiBoxAdaptorParentData?;
+      if (_section(childData!.index!) == section && sectionRender == null) {
         sectionRender = child;
       }
     });
@@ -112,7 +105,7 @@ abstract class CupertinoListDelegate extends SliverChildDelegate {
   }
 
   @override
-  Widget build(BuildContext context, int index) {
+  Widget? build(BuildContext context, int index) {
     if (index >= _estimatedItemCount || index < 0) {
       return null;
     }
@@ -142,9 +135,7 @@ abstract class CupertinoListDelegate extends SliverChildDelegate {
   @override
   bool shouldRebuild(SliverChildDelegate oldDelegate) {
     if (oldDelegate is CupertinoListDelegate) {
-      return sectionCount != oldDelegate.sectionCount ||
-          _sectionStarts != oldDelegate._sectionStarts ||
-          _estimatedItemCount != oldDelegate._estimatedItemCount;
+      return sectionCount != oldDelegate.sectionCount || _sectionStarts != oldDelegate._sectionStarts || _estimatedItemCount != oldDelegate._estimatedItemCount;
     }
     return true;
   }

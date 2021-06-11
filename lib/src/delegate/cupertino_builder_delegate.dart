@@ -4,38 +4,31 @@ import 'package:cupertino_listview/src/widget_builder.dart';
 
 class CupertinoListBuilderDelegate extends CupertinoListDelegate {
   final SectionBuilder sectionBuilder;
-  final SectionChildBuilder childBuilder;
-  final SectionItemCount itemInSectionCount;
-  final ChildSeparatorBuilder separatorBuilder;
+  final SectionChildBuilder? childBuilder;
+  final SectionItemCount? itemInSectionCount;
+  final ChildSeparatorBuilder? separatorBuilder;
 
   bool get _hasSeparator => separatorBuilder != null;
 
-  CupertinoListBuilderDelegate(
-      {int sectionCount,
-      this.sectionBuilder,
-      this.childBuilder,
-      this.itemInSectionCount,
-      this.separatorBuilder})
+  CupertinoListBuilderDelegate({required int sectionCount, required this.sectionBuilder, this.childBuilder, this.itemInSectionCount, this.separatorBuilder})
       : super(sectionCount: sectionCount);
 
   @override
   Widget buildItem(BuildContext context, IndexPath index) {
     if (_hasSeparator) {
       final builder = index.child.isEven ? childBuilder : separatorBuilder;
-      return builder(context, index.copyWith(child: index.child ~/ 2));
+      return builder!(context, index.copyWith(child: index.child ~/ 2));
     } else {
-      return childBuilder(context, index);
+      return childBuilder!(context, index);
     }
   }
 
   @override
-  Widget buildSection(
-          BuildContext context, SectionPath index, bool isAbsolute) =>
-      sectionBuilder(context, index, isAbsolute);
+  Widget buildSection(BuildContext context, SectionPath index, bool isAbsolute) => sectionBuilder(context, index, isAbsolute);
 
   @override
-  int itemCount({int section}) {
-    final childCount = itemInSectionCount(section);
+  int itemCount({required int section}) {
+    final childCount = itemInSectionCount!(section);
     return _hasSeparator ? childCount * 2 - 1 : childCount;
   }
 
